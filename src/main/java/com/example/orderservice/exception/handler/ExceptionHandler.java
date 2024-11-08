@@ -1,6 +1,7 @@
 package com.example.orderservice.exception.handler;
 
 import com.example.orderservice.exception.NotFoundException;
+import com.example.orderservice.exception.OrderCreationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,6 +14,15 @@ import java.time.Instant;
 @ControllerAdvice
 public class ExceptionHandler {
 
+    @org.springframework.web.bind.annotation.ExceptionHandler({
+            OrderCreationException.class,
+    })
+    protected ResponseEntity<ErrorResponse> handleBadRequestException(Exception exception) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST
+                , exception.getMessage()
+                , Instant.now())
+                , HttpStatus.BAD_REQUEST);
+    }
 
     @org.springframework.web.bind.annotation.ExceptionHandler({
             NotFoundException.class,

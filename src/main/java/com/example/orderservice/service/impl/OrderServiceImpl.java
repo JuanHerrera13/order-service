@@ -4,6 +4,7 @@ import com.example.orderservice.domain.Order;
 import com.example.orderservice.dto.*;
 import com.example.orderservice.dto.mapping.OrderMapper;
 import com.example.orderservice.exception.NotFoundException;
+import com.example.orderservice.exception.OrderCreationException;
 import com.example.orderservice.integration.*;
 import com.example.orderservice.repository.OrderRepository;
 import com.example.orderservice.service.OrderService;
@@ -54,6 +55,7 @@ public class OrderServiceImpl implements OrderService {
 
             for (String bookId : cartDto.getBooksIds()) {
                 final String bookName = bookApiClient.getBookById(bookId).getTitle();
+                bookApiClient.purchaseBook(bookId);
                 booksNames.add(bookName);
             }
 
@@ -70,7 +72,7 @@ public class OrderServiceImpl implements OrderService {
         } catch (NotFoundException e) {
             throw new NotFoundException("Pedido não pôde ser concluído, pois: " + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new OrderCreationException("O pedido não pode ser concluído, pois " + e.getMessage());
         }
     }
 

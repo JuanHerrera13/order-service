@@ -15,14 +15,28 @@ import static com.example.orderservice.enumerator.Error.BOOK_NOT_FOUND;
 @Service
 public class BookApiClient {
 
-    private static final String BOOK_SERVICE_URL = "http://localhost:8080/book-service/v1/books/id/";
+    private static final String BOOK_SERVICE_URL = "http://localhost:8080/book-service/v1/books";
 
     public BookDto getBookById(String bookId) {
         RestTemplate restTemplate = new RestTemplate();
         try {
             log.info("Chamando book service com bookId: {}", bookId);
-            ResponseEntity<BookDto> response = restTemplate.getForEntity(BOOK_SERVICE_URL + bookId, BookDto.class);
+            ResponseEntity<BookDto> response = restTemplate.getForEntity(BOOK_SERVICE_URL.concat("/id/") +
+                    bookId, BookDto.class);
             return response.getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            log.error("Livro não encontrado com bookId: {}", bookId);
+            throw new NotFoundException(BOOK_NOT_FOUND.getErrorDescription());
+        } catch (Exception e) {
+            throw new RestClientException(e.getMessage());
+        }
+    }
+
+    public void purchaseBook(String bookId) {
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            log.info("Chamando book service com bookId: {}", bookId);
+            restTemplate.postForEntity(BOOK_SERVICE_URL.concat("/book.purchase"), bookId, Void.class);
         } catch (HttpClientErrorException.NotFound e) {
             log.error("Livro não encontrado com bookId: {}", bookId);
             throw new NotFoundException(BOOK_NOT_FOUND.getErrorDescription());
